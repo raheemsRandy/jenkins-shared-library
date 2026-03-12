@@ -10,7 +10,7 @@ def call(Map configMap){
         REGION = 'us-east-1'
         ACC_ID ='989088456804'
         PROJECT = configMap.get('project')
-        COMPONENT = cobfigMap.get('component')
+        COMPONENT = configMap.get('component')
         IMAGE = "${ACC_ID}.dkr.ecr.${REGION}.amazonaws.com/${PROJECT}/${COMPONENT}"
         
     }
