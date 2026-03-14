@@ -47,28 +47,28 @@ def call(Map configMap){
                 echo "Running unit tests"
             }
         }
-        // stage('Sonar scan') {
-        //     environment {
-        //         scannerHome = tool 'sonar-7.2'
-        //     }
-        //     steps {
-        //         withSonarQubeEnv('sonar-7.2') {
-        //             sh """
-        //                 ${scannerHome}/bin/sonar-scanner
-        //             """
-        //         }
-        //     }
-        // }
-        //Enable webhook in sonqarqube server and wait for quality gate
-        // stage('Quality Gate Check') {
-        //     steps {
-        //         timeout(time: 1, unit: 'HOURS') { 
+     /*   stage('Sonar scan') {
+            environment {
+                scannerHome = tool 'sonar-7.2'
+            }
+            steps {
+                withSonarQubeEnv('sonar-7.2') {
+                    sh """
+                        ${scannerHome}/bin/sonar-scanner
+                    """
+                }
+            }
+        }
+        Enable webhook in sonqarqube server and wait for quality gate
+        stage('Quality Gate Check') {
+            steps {
+                timeout(time: 1, unit: 'HOURS') { 
                 
                     
-        //             waitForQualityGate abortPipeline: true
-        //         }
-        //     }
-        // }
+                    waitForQualityGate abortPipeline: true
+                }
+            }
+        }
 
          stage('Check Dependabot Alerts') {
             environment { 
@@ -103,7 +103,7 @@ def call(Map configMap){
                     }
                 }
             }
-        }
+        } */
 
                    
         // stage('Docker Build & Push') {
@@ -121,7 +121,7 @@ def call(Map configMap){
         //             }
         //         }
         //     }
-        // }
+        // } 
 
         stage('Docker Build') {
                 steps {
@@ -144,11 +144,15 @@ def call(Map configMap){
 
                                 # Push the single image (NO image index)
                                 docker push ${IMAGE}:${appVersion}
+
+                                aws ecr wait image-scan-complete --repository-name ${PROJECT}/${COMPONENT} --image-id imageTag=${appVersion}  --region ${REGION}
+
                             """
                         }
                     }
                 }
             }
+
          stage('Check Scan Results') {
             steps {
                 script {
