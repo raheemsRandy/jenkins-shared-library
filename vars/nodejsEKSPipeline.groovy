@@ -105,23 +105,8 @@ def call(Map configMap){
             }
         } */
 
-                   
-        // stage('Docker Build & Push') {
-        //     steps {
-        //         script {
-        //             withAWS(credentials: 'aws-creds', region: REGION) {
-
-        //                 sh """
-        //                 aws ecr get-login-password --region ${REGION} | docker login --username AWS --password-stdin ${ACC_ID}.dkr.ecr.${REGION}.amazonaws.com
-                        
-        //                 docker build -t ${IMAGE}:${appVersion} .
-                        
-        //                 docker push ${IMAGE}:${appVersion}
-        //                 """
-        //             }
-        //         }
-        //     }
-        // } 
+      
+        
 
         stage('Docker Build') {
                 steps {
@@ -153,40 +138,40 @@ def call(Map configMap){
                 }
             }
 
-         stage('Check Scan Results') {
-            steps {
-                script {
-                    withAWS(credentials: 'aws-creds', region: 'us-east-1') {
-                    // Fetch scan findings
-                        def findings = sh(
-                            script: """
-                                aws ecr describe-image-scan-findings \
-                                --repository-name ${PROJECT}/${COMPONENT} \
-                                --image-id imageTag=${appVersion} \
-                                --region ${REGION} \
-                                --output json
-                            """,
-                            returnStdout: true
-                        ).trim()
+        //  stage('Check Scan Results') {
+        //     steps {
+        //         script {
+        //             withAWS(credentials: 'aws-creds', region: 'us-east-1') {
+        //             // Fetch scan findings
+        //                 def findings = sh(
+        //                     script: """
+        //                         aws ecr describe-image-scan-findings \
+        //                         --repository-name ${PROJECT}/${COMPONENT} \
+        //                         --image-id imageTag=${appVersion} \
+        //                         --region ${REGION} \
+        //                         --output json
+        //                     """,
+        //                     returnStdout: true
+        //                 ).trim()
 
-                        // Parse JSON
-                        def json = readJSON text: findings
+        //                 // Parse JSON
+        //                 def json = readJSON text: findings
 
-                        def highCritical = json.imageScanFindings.findings.findAll {
-                            it.severity == "HIGH" || it.severity == "CRITICAL"
-                        }
+        //                 def highCritical = json.imageScanFindings.findings.findAll {
+        //                     it.severity == "HIGH" || it.severity == "CRITICAL"
+        //                 }
 
-                        if (highCritical.size() > 0) {
-                            echo "❌ Found ${highCritical.size()} HIGH/CRITICAL vulnerabilities!"
-                            currentBuild.result = 'FAILURE'
-                            error("Build failed due to vulnerabilities")
-                        } else {
-                            echo "✅ No HIGH/CRITICAL vulnerabilities found."
-                        }
-                    }
-                }
-            }
-        }
+        //                 if (highCritical.size() > 0) {
+        //                     echo "❌ Found ${highCritical.size()} HIGH/CRITICAL vulnerabilities!"
+        //                     currentBuild.result = 'FAILURE'
+        //                     error("Build failed due to vulnerabilities")
+        //                 } else {
+        //                     echo "✅ No HIGH/CRITICAL vulnerabilities found."
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
         stage('Trigger deploy') {
             when {
                 expression { params.deploy }
